@@ -1,0 +1,214 @@
+.airdp-root {
+  width: 100%;
+  position: relative;
+}
+.airdp-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 2px 11px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+}
+.airdp-input[aria-expanded="true"] {
+  border-color: #40a9ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+.airdp-input-content {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  min-height: 22px;
+}
+.airdp-placeholder {
+  color: #bfbfbf;
+}
+.airdp-caret {
+  color: #bfbfbf;
+}
+
+.airdp-overlay {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1050;
+  margin-top: 4px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  width: 360px;
+  animation: airdp-fade-in 0.2s ease-out;
+}
+.airdp-overlay.bottom-left {
+}
+.airdp-overlay.top-left {
+  top: auto;
+  bottom: 100%;
+}
+.airdp-overlay.bottom-right {
+  left: auto;
+  right: 0;
+}
+.airdp-overlay.top-right {
+  top: auto;
+  bottom: 100%;
+  right: 0;
+  left: auto;
+}
+
+.airdp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.airdp-title {
+  display: flex;
+  align-items: center;
+}
+.airdp-nav-left,
+.airdp-nav-right {
+  display: flex;
+}
+
+.airdp-day-cell {
+  position: relative;
+}
+.airdp-day-today-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #1890ff;
+}
+
+/* 选中态与区间态，风格对齐 AntD RangePicker */
+.airdp-selected {
+  background: #1890ff;
+  color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px #1890ff inset;
+}
+.airdp-selected-start {
+  background: #1890ff;
+  color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px #1890ff inset;
+}
+.airdp-selected-end {
+  background: #1890ff;
+  color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px #1890ff inset;
+}
+.airdp-in-range {
+  background: #e6f7ff;
+  color: rgba(0, 0, 0, 0.85);
+}
+.airdp-day-cell:hover {
+  background: #f5faff;
+}
+.airdp-selected-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* 预览区间 hover，与 AntD 轻量预览一致 */
+.airdp-hover-start,
+.airdp-hover-end {
+  outline: 1px solid #91d5ff;
+  outline-offset: -1px;
+  border-radius: 2px;
+}
+.airdp-in-range-hover {
+  background: #ecf9ff;
+}
+
+/* 输入框与面板圆角/间距对齐 AntD */
+.airdp-overlay {
+  border-radius: 4px;
+}
+.airdp-header {
+  padding: 12px;
+}
+.airdp-footer {
+  padding: 8px 12px;
+}
+
+.airdp-timepanel {
+  padding: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+.airdp-timepanel-title {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.airdp-timepanel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.airdp-time-sep {
+  margin: 0 6px;
+  color: rgba(0, 0, 0, 0.65);
+}
+.airdp-timeformat {
+  margin-left: 8px;
+  color: #999;
+}
+
+.airdp-buttons {
+  padding: 12px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.airdp-footer {
+  padding: 8px 12px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.airdp-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.airdp-clear-btn {
+  height: auto;
+  padding: 0 4px;
+}
+.airdp-selected-start:hover,
+.airdp-selected-end:hover,
+.airdp-selected:hover {
+  filter: brightness(0.95);
+}
+
+@keyframes airdp-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
