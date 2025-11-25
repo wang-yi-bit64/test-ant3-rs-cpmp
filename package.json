@@ -2,7 +2,7 @@
   "name": "test-ant3-rs-cpmp",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "build": "rsbuild build",
     "check": "biome check --write",

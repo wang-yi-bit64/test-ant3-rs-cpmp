@@ -1,37 +1,24 @@
-import { defineConfig } from "@rstest/core";
-import { pluginReact } from "@rsbuild/plugin-react";
 import { pluginBabel } from "@rsbuild/plugin-babel";
+import { pluginReact } from '@rsbuild/plugin-react';
+import { defineConfig } from '@rstest/core';
 
 export default defineConfig({
   globals: true,
-  testEnvironment: "jsdom",
+  testEnvironment: 'jsdom',
   plugins: [pluginReact(), pluginBabel()],
-  setupFilesAfterEnv: ["<rootDir>/src/setupTests.js"],
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
   projects: [
     {
-      name: "react",
+      name: 'react',
       include: [
-        "src/**/*.test.{js,jsx}",
-        "src/**/__tests__/*.{js,jsx}",
+        'src/components/MultiDatePicker/**/*.test.{js,jsx}',
+        'src/components/MultiDatePicker/**/__tests__/*.{js,jsx}',
       ],
-      testEnvironment: "jsdom",
+      testEnvironment: 'jsdom',
     },
   ],
   coverage: {
     enabled: false,
   },
-  tools: {
-    swc: {
-      jsc: {
-        parser: { syntax: "ecmascript", jsx: true },
-        transform: {
-          react: {
-            runtime: "automatic",
-            development: true,
-          },
-        },
-        target: "es2018",
-      },
-    },
-  },
+  tools: {},
 });

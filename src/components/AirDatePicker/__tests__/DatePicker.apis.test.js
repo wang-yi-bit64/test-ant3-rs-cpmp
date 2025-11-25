@@ -1,9 +1,9 @@
+import { fireEvent, render } from '@testing-library/react';
 import React, { createRef } from 'react';
-import { render, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { rstest } from '@rstest/core';
-import AirDatePicker from '../index.jsx';
 import moment from 'moment';
+import AirDatePicker from '../index.jsx';
 
 describe('AirDatePicker APIs and interactions', () => {
   test('ref api: show/hide/select/getState', () => {
@@ -24,7 +24,11 @@ describe('AirDatePicker APIs and interactions', () => {
     const onBeforeSelect = rstest.fn(() => false);
     const onChange = rstest.fn();
     const { getByRole, getByText } = render(
-      React.createElement(AirDatePicker, { onBeforeSelect, onChange, buttons: ['today'] }),
+      React.createElement(AirDatePicker, {
+        onBeforeSelect,
+        onChange,
+        buttons: ['today'],
+      }),
     );
     fireEvent.click(getByRole('combobox'));
     fireEvent.click(getByText('今天'));
