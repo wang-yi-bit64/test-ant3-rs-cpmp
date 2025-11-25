@@ -2,15 +2,17 @@
   "name": "test-ant3-rs-cpmp",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "rsbuild build",
     "check": "biome check --write",
     "dev": "rsbuild dev --open",
     "format": "biome format --write",
     "preview": "rsbuild preview",
-    "test": "jest -c jest.config.cjs",
-    "test:watch": "jest -c jest.config.cjs --watch",
-    "test:coverage": "jest -c jest.config.cjs --coverage"
+    "test": "rstest run",
+    "test:watch": "rstest run --watch",
+    "test:coverage": "rstest run",
+    "test:rsdoctor": "cross-env RSDOCTOR=true rstest run"
   },
   "dependencies": {
     "antd": "^3.26.20",
@@ -29,6 +31,7 @@
     "@rstest/core": "^0.6.6",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^12.1.5",
+    "@rstest/coverage-istanbul": "^0.6.6",
     "babel-jest": "^27.5.1",
     "babel-plugin-react-compiler": "^1.0.0",
     "core-js": "^1.2.7",
@@ -38,7 +41,8 @@
     "jest": "^27.5.1",
     "jest-environment-jsdom": "^27.5.1",
     "jsdom": "^27.2.0",
-    "react-compiler-runtime": "^1.0.0"
+    "react-compiler-runtime": "^1.0.0",
+    "cross-env": "^7.0.0"
   },
   "packageManager": "pnpm@10.22.0+sha512.bf049efe995b28f527fd2b41ae0474ce29186f7edcb3bf545087bd61fbbebb2bf75362d1307fda09c2d288e1e499787ac12d4fcb617a974718a6051f2eee741c"
 }

@@ -386,19 +386,6 @@ const AirDatePicker = forwardRef((props, ref) => {
 
   const dateCellRenderer = useCallback(
     (date) => {
-      if (onRenderCell) {
-        const res = onRenderCell({ date: date.toDate(), cellType: "day" })
-        if (res && (res.html || res.classes || res.attrs)) {
-          if (res.html) {
-            return (
-              <div className={res.classes} {...(res.attrs || {})} dangerouslySetInnerHTML={{ __html: res.html }} />
-            )
-          }
-          return (
-            <div className={res.classes} {...(res.attrs || {})}>{date.date()}</div>
-          )
-        }
-      }
 
       const isToday = date.isSame(moment(), "day")
       const isSelectedSingle = mode === "single" && selectedDates[0] && date.isSame(selectedDates[0], "day")
@@ -426,12 +413,14 @@ const AirDatePicker = forwardRef((props, ref) => {
       if (isRangeEndHover) classes.push("airdp-hover-end")
       if (inRangeHover) classes.push("airdp-in-range-hover")
 
+      const enterFn = () => { if (mode === "range" && rangeStart && canHover) setHoverDate(date) }
+      const leaveFn = () => { if (mode === "range") setHoverDate(null) }
       return (
         <div
           className={classes.join(" ")}
           aria-selected={isSelectedSingle || isSelectedMultiple || isRangeStartFinal || isRangeEndFinal}
-          onMouseEnter={() => { if (mode === "range" && rangeStart && canHover) setHoverDate(date) }}
-          onMouseLeave={() => { if (mode === "range") setHoverDate(null) }}
+          onMouseEnter={enterFn}
+          onMouseLeave={leaveFn}
         >
           {date.date()}
           {isToday && <div className="airdp-day-today-indicator" />}
@@ -441,7 +430,7 @@ const AirDatePicker = forwardRef((props, ref) => {
         </div>
       )
     },
-    [onRenderCell, mode, selectedDates, rangeStart, hoverDate],
+    [mode, selectedDates, rangeStart, hoverDate],
   )
 
   const renderButtons = useMemo(() => {

@@ -1,15 +1,15 @@
-const React = require('react');
-const { createRef } = React;
-const { render, fireEvent } = require('@testing-library/react');
-require('@testing-library/jest-dom');
-const AirDatePicker = require('../index.jsx').default;
-const moment = require('moment');
+import React, { createRef } from 'react';
+import { render, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { rstest } from '@rstest/core';
+import AirDatePicker from '../index.jsx';
+import moment from 'moment';
 
 describe('AirDatePicker APIs and interactions', () => {
   test('ref api: show/hide/select/getState', () => {
     const ref = createRef();
     const { getByRole } = render(
-      <AirDatePicker ref={ref} buttons={['today']} />,
+      React.createElement(AirDatePicker, { ref, buttons: ['today'] }),
     );
     expect(ref.current).toBeTruthy();
     ref.current.show();
@@ -21,14 +21,10 @@ describe('AirDatePicker APIs and interactions', () => {
   });
 
   test('onBeforeSelect can block selection', () => {
-    const onBeforeSelect = jest.fn(() => false);
-    const onChange = jest.fn();
+    const onBeforeSelect = rstest.fn(() => false);
+    const onChange = rstest.fn();
     const { getByRole, getByText } = render(
-      <AirDatePicker
-        onBeforeSelect={onBeforeSelect}
-        onChange={onChange}
-        buttons={['today']}
-      />,
+      React.createElement(AirDatePicker, { onBeforeSelect, onChange, buttons: ['today'] }),
     );
     fireEvent.click(getByRole('combobox'));
     fireEvent.click(getByText('今天'));
@@ -37,9 +33,9 @@ describe('AirDatePicker APIs and interactions', () => {
   });
 
   test('onSelect fired after selection', () => {
-    const onSelect = jest.fn();
+    const onSelect = rstest.fn();
     const { getByRole, getByText } = render(
-      <AirDatePicker onSelect={onSelect} buttons={['today']} />,
+      React.createElement(AirDatePicker, { onSelect, buttons: ['today'] }),
     );
     fireEvent.click(getByRole('combobox'));
     fireEvent.click(getByText('今天'));
@@ -49,7 +45,7 @@ describe('AirDatePicker APIs and interactions', () => {
   test('onChangeViewDate invoked by nav', () => {
     const onChangeViewDate = jest.fn();
     const { getByRole } = render(
-      <AirDatePicker onChangeViewDate={onChangeViewDate} />,
+      React.createElement(AirDatePicker, { onChangeViewDate }),
     );
     fireEvent.click(getByRole('combobox'));
     // keyboard Ctrl+Right increases month
@@ -59,7 +55,7 @@ describe('AirDatePicker APIs and interactions', () => {
 
   test('aria-selected applied on selected cell', () => {
     const { getByRole, getByText, container } = render(
-      <AirDatePicker buttons={['today']} />,
+      React.createElement(AirDatePicker, { buttons: ['today'] }),
     );
     fireEvent.click(getByRole('combobox'));
     fireEvent.click(getByText('今天'));
@@ -69,7 +65,7 @@ describe('AirDatePicker APIs and interactions', () => {
 
   test('performance: open and select under threshold', () => {
     const { getByRole, getByText } = render(
-      <AirDatePicker buttons={['today']} />,
+      React.createElement(AirDatePicker, { buttons: ['today'] }),
     );
     const t0 = performance.now();
     fireEvent.click(getByRole('combobox'));

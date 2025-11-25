@@ -1,25 +1,24 @@
 const { TextEncoder, TextDecoder } = require('util');
+const { rstest } = require('@rstest/core');
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
-// 模拟 matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation((query) => ({
+  value: rstest.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
+    addListener: rstest.fn(),
+    removeListener: rstest.fn(),
+    addEventListener: rstest.fn(),
+    removeEventListener: rstest.fn(),
+    dispatchEvent: rstest.fn(),
   })),
 });
 
-// 模拟 ResizeObserver
-global.ResizeObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
+global.ResizeObserver = rstest.fn().mockImplementation(() => ({
+  observe: rstest.fn(),
+  unobserve: rstest.fn(),
+  disconnect: rstest.fn(),
 }));
