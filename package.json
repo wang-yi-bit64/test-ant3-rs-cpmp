@@ -8,10 +8,7 @@
     "check": "biome check --write",
     "dev": "rsbuild dev --open",
     "format": "biome format --write",
-    "preview": "rsbuild preview",
-    "test": "jest run",
-    "test:watch": "jest run --watch",
-    "test:coverage": "jest run"
+    "preview": "rsbuild preview"
   },
   "dependencies": {
     "antd": "^3.26.20",
@@ -27,17 +24,8 @@
     "@rsbuild/core": "^1.6.7",
     "@rsbuild/plugin-babel": "^1.0.6",
     "@rsbuild/plugin-react": "^1.4.2",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^12.1.5",
-    "babel-jest": "^27.5.1",
     "core-js": "^1.2.7",
     "cross-env": "^7.0.0",
-    "enzyme": "^3.11.0",
-    "enzyme-adapter-react-16": "^1.15.8",
-    "happy-dom": "^20.0.10",
-    "jest": "^27.5.1",
-    "jest-environment-jsdom": "^27.5.1",
-    "jsdom": "^27.2.0",
     "react-compiler-runtime": "^1.0.0"
   },
   "packageManager": "pnpm@10.22.0+sha512.bf049efe995b28f527fd2b41ae0474ce29186f7edcb3bf545087bd61fbbebb2bf75362d1307fda09c2d288e1e499787ac12d4fcb617a974718a6051f2eee741c"
