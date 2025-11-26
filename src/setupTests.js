@@ -1,7 +1,12 @@
-const { TextEncoder, TextDecoder } = require('util');
-const { rstest } = require('@rstest/core');
+import { TextEncoder, TextDecoder } from 'util';
+import { rstest } from '@rstest/core';
+import '@testing-library/jest-dom';
+
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
+if (!global.expect && rstest.expect) {
+  global.expect = rstest.expect;
+}
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

@@ -40,8 +40,8 @@ const MultiDatePicker = ({
 
   const i18n = useMemo(() => {
     const dict = {
-      'zh-CN': { choose: '请选择日期', selectedCount: '已选', close: '关闭' },
-      'en-US': { choose: 'Select date(s)', selectedCount: 'Selected', close: 'Close' },
+      'zh-CN': { choose: '请选择日期', selectedCount: '已选', close: '关闭', clear: '清除' },
+      'en-US': { choose: 'Select date(s)', selectedCount: 'Selected', close: 'Close', clear: 'Clear' },
     };
     return dict[locale || 'zh-CN'];
   }, [locale]);
@@ -125,30 +125,13 @@ const MultiDatePicker = ({
     [selected, disabledDate, onToggleDate],
   );
 
-  const renderSelectedTags = useMemo(
+  const renderSelectedText = useMemo(
     () => (
-      <div className="mdp-tags">
-        {selected.map((d, i) => (
-          <Tag
-            key={`${d.format('YYYY-MM-DD')}-${i}`}
-            size="small"
-            closable
-            onClose={(e) => {
-              e.preventDefault();
-              const next = selected.filter(
-                (x) => x.format('YYYY-MM-DD') !== d.format('YYYY-MM-DD'),
-              );
-              setSelected(next);
-              triggerChange(next);
-            }}
-            color="blue"
-          >
-            {d.format('YYYY-MM-DD')}
-          </Tag>
-        ))}
-      </div>
+      <span className="mdp-text-value" title={selected.map((d) => d.format('YYYY-MM-DD')).join(',')}>
+        {selected.map((d) => d.format('YYYY-MM-DD')).join(',')}
+      </span>
     ),
-    [selected, triggerChange],
+    [selected],
   );
 
   return (
@@ -165,15 +148,17 @@ const MultiDatePicker = ({
       >
         <div className="mdp-input-content">
           {selected.length > 0 ? (
-            renderSelectedTags
+            renderSelectedText
           ) : (
             <span className="mdp-placeholder">
               {placeholder || i18n.choose}
             </span>
           )}
         </div>
-        <span className="mdp-count">{i18n.selectedCount}: {selected.length}</span>
-        <Icon type={open ? 'up' : 'down'} className="mdp-caret" />
+        <Icon type="calendar" className="mdp-calendar-icon" />
+        {selected.length > 0 && (
+          <span className="mdp-badge-count">{selected.length}</span>
+        )}
       </div>
 
       {open && (
@@ -183,8 +168,7 @@ const MultiDatePicker = ({
           aria-label="Multiple date picker"
         >
           <div className="mdp-header">
-            <span className="mdp-title">{i18n.selectedCount}: {selected.length}</span>
-            <div className="mdp-nav">
+            <div className="mdp-nav" style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
               <Icon
                 type="double-left"
                 onClick={() =>
@@ -197,6 +181,7 @@ const MultiDatePicker = ({
                   setViewDate(viewDate.clone().subtract(1, 'month'))
                 }
               />
+              <span className="mdp-header-label">{viewDate.format('YYYY年MM月')}</span>
               <Icon
                 type="right"
                 onClick={() => setViewDate(viewDate.clone().add(1, 'month'))}
@@ -205,7 +190,6 @@ const MultiDatePicker = ({
                 type="double-right"
                 onClick={() => setViewDate(viewDate.clone().add(1, 'year'))}
               />
-              <Icon type="close" onClick={() => setOpen(false)} />
             </div>
           </div>
           <AntDatePicker
@@ -219,9 +203,15 @@ const MultiDatePicker = ({
             style={{ width: '100%' }}
           />
           <div className="mdp-footer">
-            <button className="ant-btn" onClick={() => setOpen(false)}>
-              {i18n.close}
-            </button>
+            <a
+              className="mdp-clear-btn"
+              onClick={() => {
+                setSelected([]);
+                triggerChange([]);
+              }}
+            >
+              {i18n.clear}
+            </a>
           </div>
         </div>
       )}

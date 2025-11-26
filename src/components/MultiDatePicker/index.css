@@ -8,26 +8,54 @@
   display: flex;
   align-items: center;
   min-height: 32px;
-  padding: 2px 11px;
+  padding: 4px 11px;
   cursor: pointer;
+  position: relative; /* For badge positioning */
 }
 .mdp-input-content {
   flex: 1;
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
   align-items: center;
-  min-height: 22px;
+  overflow: hidden; /* Ensure text doesn't overflow */
+}
+.mdp-text-value {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: rgba(0, 0, 0, 0.65);
+  width: 100%;
+  font-size: 14px;
 }
 .mdp-placeholder {
   color: #bfbfbf;
 }
-.mdp-count {
-  margin-right: 8px;
-  color: rgba(0, 0, 0, 0.45);
+
+/* Calendar icon */
+.mdp-calendar-icon {
+  color: rgba(0, 0, 0, 0.25);
+  margin-left: 8px;
+  font-size: 14px;
 }
-.mdp-caret {
-  color: #bfbfbf;
+
+/* Badge count */
+.mdp-badge-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  color: #fff;
+  font-weight: normal;
+  font-size: 10px;
+  line-height: 16px;
+  white-space: nowrap;
+  text-align: center;
+  background: #faad14; /* Yellow/Orange */
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px #fff;
+  z-index: 10;
 }
 
 .mdp-overlay {
@@ -39,56 +67,79 @@
   background: #fff;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  width: 360px;
+  width: 300px; /* Standard AntD DatePicker width is usually smaller than 360 */
   animation: mdp-fade-in 0.2s ease-out;
 }
+
 .mdp-header {
+  padding: 0 10px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  border-bottom: 1px solid #e8e8e8;
+}
+.mdp-nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  width: 100%;
 }
-.mdp-title {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.85);
+.mdp-nav i {
+  cursor: pointer;
+  padding: 0 5px;
+  color: rgba(0, 0, 0, 0.45);
+}
+.mdp-nav i:hover {
+  color: rgba(0, 0, 0, 0.65);
+}
+.mdp-header-label {
   font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  flex: 1;
+  text-align: center;
 }
+
 .mdp-footer {
-  padding: 8px 12px;
-  display: flex;
-  justify-content: flex-end;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid #e8e8e8;
+  padding: 10px;
+  line-height: normal;
+  text-align: center;
+}
+.mdp-clear-btn {
+  display: inline-block;
+  color: #1890ff;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+.mdp-clear-btn:hover {
+  color: #40a9ff;
 }
 
 .mdp-day-cell {
   position: relative;
   cursor: pointer;
   border-radius: 2px;
+  transition: background 0.3s;
 }
 .mdp-day-cell:hover {
-  background: #f5faff;
+  background: #e6f7ff;
 }
 .mdp-selected {
   background: #1890ff;
   color: #fff;
   box-shadow: 0 0 0 1px #1890ff inset;
 }
+.mdp-selected:hover {
+  background: #1890ff;
+}
 .mdp-selected-dot {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 6px;
-  height: 6px;
+  top: 3px;
+  right: 3px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background: #fff;
-}
-
-.mdp-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  align-items: center;
 }
 
 @keyframes mdp-fade-in {
