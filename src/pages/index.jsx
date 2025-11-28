@@ -1,6 +1,5 @@
 import { Button } from 'antd';
 import React, { useState } from 'react';
-import TestAirDatePickerPage from './TestAirDatePickerPage';
 import TestMultiDatePickerPage from '@/components/MultiDatePicker/demo';
 function IndexPages() {
   const [activeTab, setActiveTab] = useState('multi');
@@ -21,7 +20,6 @@ function IndexPages() {
           MultiDatePicker (Hooks)
         </Button>
       </div>
-      {activeTab === 'air' && <TestAirDatePickerPage />}
       {activeTab === 'multi' && <TestMultiDatePickerPage />}
     </div>
   );
