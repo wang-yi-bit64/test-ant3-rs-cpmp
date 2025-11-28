@@ -1,4 +1,4 @@
-import { expect, test } from '@rstest/core';
+import { expect, test } from 'vitest';
 
 test('smoke works', () => {
   expect(1 + 1).toBe(2);
