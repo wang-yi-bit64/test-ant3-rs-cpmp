@@ -8,14 +8,18 @@
     "check": "biome check --write",
     "dev": "rsbuild dev --open",
     "format": "biome format --write",
-    "preview": "rsbuild preview"
+    "preview": "rsbuild preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
   },
   "dependencies": {
     "antd": "^3.26.20",
     "moment": "^2.30.1",
     "prop-types": "^15.8.1",
     "react": "^16.14.0",
-    "react-dom": "^16.14.0"
+    "react-dom": "^16.14.0",
+    "react-element-popper": "^2.1.7"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.28.5",
@@ -24,9 +28,15 @@
     "@rsbuild/core": "^1.6.7",
     "@rsbuild/plugin-babel": "^1.0.6",
     "@rsbuild/plugin-react": "^1.4.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@vitest/ui": "^4.0.14",
     "core-js": "^1.2.7",
     "cross-env": "^7.0.0",
-    "react-compiler-runtime": "^1.0.0"
+    "fast-check": "^4.3.0",
+    "jsdom": "^27.2.0",
+    "react-compiler-runtime": "^1.0.0",
+    "vitest": "^4.0.14"
   },
   "packageManager": "pnpm@10.22.0+sha512.bf049efe995b28f527fd2b41ae0474ce29186f7edcb3bf545087bd61fbbebb2bf75362d1307fda09c2d288e1e499787ac12d4fcb617a974718a6051f2eee741c"
 }
