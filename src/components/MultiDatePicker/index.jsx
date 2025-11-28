@@ -29,6 +29,7 @@ const MultiDatePicker = ({
   locale,
 }) => {
   const [open, setOpen] = useState(false);
+  
   const [selected, setSelected] = useState(() => {
     if (Array.isArray(value) && value.length)
       return value.map((d) => moment(d));
@@ -45,6 +46,11 @@ const MultiDatePicker = ({
     };
     return dict[locale || 'zh-CN'];
   }, [locale]);
+
+  useEffect(() => {
+    console.log('MultiDatePicker mounted');
+    return () => console.log('MultiDatePicker unmounted');
+  }, []);
 
   useEffect(() => {
     if (Array.isArray(value)) setSelected(value.map((d) => moment(d)));
