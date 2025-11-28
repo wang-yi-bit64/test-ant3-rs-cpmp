@@ -22,7 +22,8 @@
   - Add PropTypes validation
   - _Requirements: 1.1, 1.4_
 
-- [-] 2.1 Write property test for controlled value synchronization
+- [ ] 2.1 Write property test for controlled value synchronization
+
 
   - **Property 3: Controlled value synchronization**
   - **Validates: Requirements 1.4**
