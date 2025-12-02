@@ -1,6 +1,7 @@
 import { Button } from 'antd';
 import React, { useState } from 'react';
 import TestMultiDatePickerPage from '@/components/MultiDatePicker/demo';
+
 function IndexPages() {
   const [activeTab, setActiveTab] = useState('multi');
 
@@ -13,7 +14,7 @@ function IndexPages() {
         >
           AirDatePicker (Hooks)
         </Button>
-         <Button
+        <Button
           onClick={() => setActiveTab('multi')}
           type={activeTab === 'air' ? 'primary' : 'default'}
         >

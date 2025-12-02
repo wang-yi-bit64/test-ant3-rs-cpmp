@@ -12,7 +12,7 @@ import 'antd/lib/input/style/index.css';
 import 'antd/lib/tag/style/index.css';
 import 'antd/lib/button/style/index.css';
 import 'antd/lib/icon/style/index.css';
-import './index.css';
+import styles from './index.module.css';
 
 function normalizeToMoments(value, dateFormat) {
   if (!value) return [];
@@ -299,9 +299,9 @@ function MultiDatePicker(props) {
   );
 
   return (
-    <div className="mdp-wrapper" ref={wrapperRef}>
+    <div className={styles.wrapper} ref={wrapperRef}>
       <div
-        className="mdp-input-row"
+        className={styles.inputRow}
         role="combobox"
         aria-haspopup="grid"
         aria-expanded={open}
@@ -322,28 +322,26 @@ function MultiDatePicker(props) {
           }
         />
         {sortedInternal.length > 0 && (
-          <div className="mdp-input-tags" onClick={onOpen}>
+          <div className={styles.inputTags} onClick={onOpen}>
             {inputDisplayTags.items.map((d) => (
-              <Tag
-                key={`in-${d.format('YYYY-MM-DD')}`}
-                className="mdp-tag-primary"
-              >
+              <Tag key={`in-${d.format('YYYY-MM-DD')}`} className={styles.tagPrimary} color="#108ee9">
                 {d.format(displayFormat)}
               </Tag>
             ))}
             {inputDisplayTags.rest > 0 && (
-              <Tag className="mdp-tag-ellipsis">{`+${inputDisplayTags.rest}`}</Tag>
+              <Tag className={styles.tagEllipsis}>{`+${inputDisplayTags.rest}`}</Tag>
             )}
           </div>
         )}
       </div>
-      <div className="mdp-tags-row">
+      <div className={styles.tagsRow}>
         {sortedInternal.map((d) => (
           <Tag
             key={d.format('YYYY-MM-DD')}
             closable
             onClose={() => onCellClick(d)}
-            className="mdp-tag-primary"
+            className={styles.tagPrimary}
+            color="#108ee9"
           >
             {d.format(displayFormat)}
           </Tag>
@@ -360,7 +358,7 @@ function MultiDatePicker(props) {
       {open && (
         <>
           <div className="mdp-mask" onClick={onClose} />
-          <div className="mdp-overlay" role="dialog" ref={overlayRef}>
+          <div className={styles.overlay} role="dialog" ref={overlayRef}>
             <div className="mdp-header">
               <Button
                 size="small"
@@ -428,15 +426,15 @@ function MultiDatePicker(props) {
                   }
                 }
                 const className = [
-                  'mdp-day-cell',
-                  selected ? 'mdp-selected' : '',
-                  disabled ? 'mdp-disabled' : '',
-                  thisMonth ? 'mdp-cur' : 'mdp-other',
-                  today ? 'mdp-today' : '',
-                  focused ? 'mdp-focused' : '',
-                  selected && mode === 'range' ? 'mdp-range' : '',
-                  adjLeft ? 'mdp-adj-left mdp-link-left' : '',
-                  adjRight ? 'mdp-adj-right mdp-link-right' : '',
+                  styles.dayCell,
+                  selected ? styles.selected : '',
+                  disabled ? styles.disabled : '',
+                  thisMonth ? styles.cur : styles.other,
+                  today ? styles.today : '',
+                  focused ? styles.focused : '',
+                  selected && mode === 'range' ? styles.range : '',
+                  adjLeft ? `${styles.adjLeft} ${styles.linkLeft}` : '',
+                  adjRight ? `${styles.adjRight} ${styles.linkRight}` : '',
                 ].join(' ');
                 return (
                   <button

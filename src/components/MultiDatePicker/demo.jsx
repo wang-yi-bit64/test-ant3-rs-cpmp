@@ -45,11 +45,12 @@ function Demo() {
         presets={presets}
         displayFormat="YYYY-MM-DD"
         weekdayFormat="xingqi"
+        placeholder="请选择日期"
       />
       <div style={{ marginTop: 16 }}>
         <Form>
           <Form.Item label="范围选择">
-            <MultiDatePicker mode="range" />
+            <MultiDatePicker value={val} mode="multiple" />
           </Form.Item>
         </Form>
       </div>
