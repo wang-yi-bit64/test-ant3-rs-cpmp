@@ -1,154 +1,188 @@
-@import "antd/lib/style/index.css";
-
-.mdp-root {
+.mdp-wrapper {
   position: relative;
   width: 100%;
 }
-.mdp-input {
-  display: flex;
-  align-items: center;
-  min-height: 32px;
-  padding: 4px 11px;
-  cursor: pointer;
-  position: relative; /* For badge positioning */
-}
-.mdp-input-content {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  overflow: hidden; /* Ensure text doesn't overflow */
-}
-.mdp-text-value {
-  display: block;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: rgba(0, 0, 0, 0.65);
+.mdp-input-row {
   width: 100%;
-  font-size: 14px;
+  position: relative;
 }
-.mdp-placeholder {
-  color: #bfbfbf;
+.mdp-suffix {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
 }
-
-/* Calendar icon */
-.mdp-calendar-icon {
-  color: rgba(0, 0, 0, 0.25);
-  margin-left: 8px;
-  font-size: 14px;
+.mdp-tags-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
 }
-
-/* Badge count */
-.mdp-badge-count {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  color: #fff;
-  font-weight: normal;
-  font-size: 10px;
-  line-height: 16px;
-  white-space: nowrap;
-  text-align: center;
-  background: #faad14; /* Yellow/Orange */
-  border-radius: 8px;
-  box-shadow: 0 0 0 1px #fff;
-  z-index: 10;
+.mdp-count-badge {
+  background: #fadb14;
+  color: #000;
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 12px;
 }
-
 .mdp-overlay {
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 1050;
-  margin-top: 4px;
+  z-index: 1000;
   background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  width: 300px; /* Standard AntD DatePicker width is usually smaller than 360 */
-  animation: mdp-fade-in 0.2s ease-out;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 8px;
+  padding: 8px;
+  width: 320px;
 }
-
+.mdp-mask {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 999;
+}
 .mdp-header {
-  padding: 0 10px;
-  height: 40px;
-  line-height: 40px;
-  text-align: center;
-  border-bottom: 1px solid #e8e8e8;
-}
-.mdp-nav {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  width: 100%;
+  gap: 8px;
+  margin-bottom: 8px;
 }
-.mdp-nav i {
-  cursor: pointer;
-  padding: 0 5px;
-  color: rgba(0, 0, 0, 0.45);
+.mdp-header-title {
+  font-weight: 600;
 }
-.mdp-nav i:hover {
-  color: rgba(0, 0, 0, 0.65);
+.mdp-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 4px;
 }
-.mdp-header-label {
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  flex: 1;
+.mdp-weekday-cell {
   text-align: center;
+  font-size: 12px;
+  color: #595959;
 }
-
-.mdp-footer {
-  border-top: 1px solid #e8e8e8;
-  padding: 10px;
-  line-height: normal;
-  text-align: center;
+.mdp-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  outline: none;
+  overflow: visible;
 }
-.mdp-clear-btn {
-  display: inline-block;
-  color: #1890ff;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-.mdp-clear-btn:hover {
-  color: #40a9ff;
-}
-
 .mdp-day-cell {
-  position: relative;
+  border: none;
+  background: transparent;
+  padding: 8px;
+  text-align: center;
   cursor: pointer;
-  border-radius: 2px;
-  transition: background 0.3s;
+  border-radius: 4px;
+  position: relative;
+  transition:
+    background 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
 }
-.mdp-day-cell:hover {
-  background: #e6f7ff;
+.mdp-day-cell.mdp-cur {
+  color: #000;
 }
-.mdp-selected {
-  background: #1890ff;
-  color: #fff;
-  box-shadow: 0 0 0 1px #1890ff inset;
+.mdp-day-cell.mdp-other {
+  color: #bfbfbf;
 }
-.mdp-selected:hover {
-  background: #1890ff;
+.mdp-day-cell.mdp-today {
+  border: 1px solid #1890ff;
 }
-.mdp-selected-dot {
+.mdp-day-cell.mdp-selected {
+  background: linear-gradient(
+    to right,
+    rgba(24, 144, 255, 0.12),
+    rgba(24, 144, 255, 0.2)
+  );
+  border: 1px solid #91d5ff;
+  color: #000;
+}
+.mdp-day-cell.mdp-selected.mdp-range {
+  background: linear-gradient(
+    to right,
+    rgba(24, 144, 255, 0.12),
+    rgba(24, 144, 255, var(--mdp-alpha, 0.35))
+  );
+}
+.mdp-day-cell.mdp-selected.mdp-adj-left:not(.mdp-adj-right) {
+  background: linear-gradient(
+    to right,
+    rgba(24, 144, 255, 0.2),
+    rgba(24, 144, 255, 0)
+  );
+}
+.mdp-day-cell.mdp-selected.mdp-adj-right:not(.mdp-adj-left) {
+  background: linear-gradient(
+    to left,
+    rgba(24, 144, 255, 0.2),
+    rgba(24, 144, 255, 0)
+  );
+}
+.mdp-day-cell.mdp-selected.mdp-adj-left.mdp-adj-right {
+  background: linear-gradient(
+    to right,
+    rgba(24, 144, 255, 0.2),
+    rgba(24, 144, 255, var(--mdp-alpha, 0.35))
+  );
+}
+.mdp-day-cell.mdp-selected.mdp-link-left::before,
+.mdp-day-cell.mdp-selected.mdp-link-right::after {
+  content: "";
   position: absolute;
-  top: 3px;
-  right: 3px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #fff;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  background: #91d5ff;
 }
-
-@keyframes mdp-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(-2px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.mdp-day-cell.mdp-selected.mdp-link-left::before {
+  left: -6px;
+  width: 6px;
+}
+.mdp-day-cell.mdp-selected.mdp-link-right::after {
+  right: -6px;
+  width: 6px;
+}
+.mdp-day-cell.mdp-selected:hover {
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+.mdp-day-cell.mdp-disabled {
+  color: #d9d9d9;
+  cursor: not-allowed;
+}
+.mdp-day-cell.mdp-focused {
+  box-shadow: 0 0 0 2px #91d5ff;
+}
+.mdp-presets {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.mdp-extra-footer {
+  margin-top: 8px;
+}
+.mdp-input-tags {
+  position: absolute;
+  left: 12px;
+  right: 80px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+.mdp-tag-primary.ant-tag {
+  background: #1890ff;
+  border-color: #1890ff;
+  color: #fff;
+}
+.mdp-tag-ellipsis.ant-tag {
+  background: transparent;
+  border-color: transparent;
+  color: #595959;
 }

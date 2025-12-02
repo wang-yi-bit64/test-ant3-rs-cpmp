@@ -1,4 +1,4 @@
-import { DatePicker as AntDatePicker, Icon, Tag } from 'antd';
+import { Button, Icon, Input, Tag } from 'antd';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import React, {
@@ -8,234 +8,482 @@ import React, {
   useRef,
   useState,
 } from 'react';
-// 样式由使用者按需引入，测试环境不加载 CSS
+import 'antd/lib/input/style/index.css';
+import 'antd/lib/tag/style/index.css';
+import 'antd/lib/button/style/index.css';
+import 'antd/lib/icon/style/index.css';
+import './index.css';
 
-/**
- * 多选日期组件（AntD v3 风格）。
- * 保留原有 DatePicker 基础功能，扩展不连续日期多选、键盘导航与最大选择数。
- * 返回值为 Date[]，支持受控与非受控模式。
- */
+function normalizeToMoments(value, dateFormat) {
+  if (!value) return [];
+  if (Array.isArray(value)) {
+    return value.map((v) =>
+      moment.isMoment(v) ? v.clone() : moment(v, dateFormat),
+    );
+  }
+  return [];
+}
 
-const MultiDatePicker = ({
-  value,
-  defaultValue,
-  onChange,
-  disabledDate,
-  placeholder,
-  size,
-  className,
-  style,
-  maxCount,
-  locale,
-}) => {
+function formatDates(dates, fmt) {
+  if (!dates || dates.length === 0) return [];
+  return dates.map((d) => d.format(fmt));
+}
+
+function isDisabled(d, disabledDate) {
+  if (!disabledDate) return false;
+  try {
+    return !!disabledDate(d);
+  } catch (_) {
+    return false;
+  }
+}
+
+function betweenInclusive(a, b) {
+  const start = a.isBefore(b) ? a : b;
+  const end = a.isBefore(b) ? b : a;
+  const days = [];
+  let cur = start.clone();
+  while (cur.isSameOrBefore(end, 'day')) {
+    days.push(cur.clone());
+    cur = cur.add(1, 'day');
+  }
+  return days;
+}
+
+function MultiDatePicker(props) {
+  const {
+    value,
+    onChange,
+    mode = 'multiple',
+    disabledDate,
+    dateFormat = 'YYYY-MM-DD',
+    displayFormat = 'MM-DD',
+    placeholder = '请选择日期',
+    presets,
+    renderExtraFooter,
+    locale,
+    weekdayFormat = 'zhou',
+    maxTagCount = 2,
+  } = props;
+
   const [open, setOpen] = useState(false);
-  
-  const [selected, setSelected] = useState(() => {
-    if (Array.isArray(value) && value.length)
-      return value.map((d) => moment(d));
-    if (Array.isArray(defaultValue) && defaultValue.length)
-      return defaultValue.map((d) => moment(d));
-    return [];
-  });
-  const rootRef = useRef(null);
+  const [cursorMonth, setCursorMonth] = useState(moment().startOf('month'));
+  const [internal, setInternal] = useState([]);
+  const [focusIndex, setFocusIndex] = useState(null);
+  const inputRef = useRef(null);
+  const gridRef = useRef(null);
+  const wrapperRef = useRef(null);
+  const overlayRef = useRef(null);
 
-  const i18n = useMemo(() => {
-    const dict = {
-      'zh-CN': { choose: '请选择日期', selectedCount: '已选', close: '关闭', clear: '清除' },
-      'en-US': { choose: 'Select date(s)', selectedCount: 'Selected', close: 'Close', clear: 'Clear' },
-    };
-    return dict[locale || 'zh-CN'];
+  useEffect(() => {
+    if (locale) moment.locale(locale);
   }, [locale]);
 
   useEffect(() => {
-    console.log('MultiDatePicker mounted');
-    return () => console.log('MultiDatePicker unmounted');
+    setInternal(normalizeToMoments(value, dateFormat));
+  }, [value, dateFormat]);
+
+  const weeks = useMemo(() => {
+    const start = cursorMonth.clone().startOf('month').startOf('week');
+    const days = [];
+    for (let i = 0; i < 42; i += 1) days.push(start.clone().add(i, 'day'));
+    return days;
+  }, [cursorMonth]);
+
+  const weekdays = useMemo(() => {
+    const zh = ['日', '一', '二', '三', '四', '五', '六'];
+    const prefix =
+      weekdayFormat === 'xingqi'
+        ? '星期'
+        : weekdayFormat === 'zhou'
+          ? '周'
+          : '';
+    const ld = moment.localeData();
+    const firstDay = ld.firstDayOfWeek();
+    const ordered = [];
+    for (let i = 0; i < 7; i += 1) {
+      const t = zh[(i + firstDay) % 7];
+      ordered.push(prefix ? `${prefix}${t}` : t);
+    }
+    return ordered;
+  }, [locale, weekdayFormat]);
+
+  const sortedInternal = useMemo(() => {
+    const arr = internal
+      .slice()
+      .sort((a, b) => (a.isBefore(b) ? -1 : a.isAfter(b) ? 1 : 0));
+    return arr;
+  }, [internal]);
+
+  const emitChange = useCallback(
+    (dates) => {
+      const next = dates && dates.length ? dates.map((d) => d.clone()) : [];
+      const strings = next.length ? formatDates(next, dateFormat) : [];
+      if (onChange)
+        onChange(next.length ? next : null, next.length ? strings : null);
+    },
+    [onChange, dateFormat],
+  );
+
+  const selectMultiple = useCallback(
+    (d) => {
+      if (isDisabled(d, disabledDate)) return;
+      const key = d.format('YYYY-MM-DD');
+      const exists = internal.find((x) => x.isSame(d, 'day'));
+      const next = exists
+        ? internal.filter((x) => !x.isSame(d, 'day'))
+        : internal.concat(d.clone());
+      setInternal(next);
+      emitChange(next);
+    },
+    [internal, disabledDate, emitChange],
+  );
+
+  const selectRange = useCallback(
+    (d) => {
+      if (isDisabled(d, disabledDate)) return;
+      if (internal.length === 0) {
+        const next = [d.clone()];
+        setInternal(next);
+        emitChange(next);
+        return;
+      }
+      if (internal.length === 1) {
+        const nextRange = betweenInclusive(internal[0], d).filter(
+          (x) => !isDisabled(x, disabledDate),
+        );
+        setInternal(nextRange);
+        emitChange(nextRange);
+        return;
+      }
+      const next = [d.clone()];
+      setInternal(next);
+      emitChange(next);
+    },
+    [internal, disabledDate, emitChange],
+  );
+
+  const onCellClick = useCallback(
+    (d) => {
+      if (mode === 'range') {
+        selectRange(d);
+      } else if (mode === 'single') {
+        if (isDisabled(d, disabledDate)) return;
+        const next = [d.clone()];
+        setInternal(next);
+        emitChange(next);
+      } else {
+        selectMultiple(d);
+      }
+    },
+    [mode, selectRange, selectMultiple, disabledDate, emitChange],
+  );
+
+  const isSelected = useCallback(
+    (d) => internal.some((x) => x.isSame(d, 'day')),
+    [internal],
+  );
+  const isThisMonth = useCallback(
+    (d) => d.isSame(cursorMonth, 'month'),
+    [cursorMonth],
+  );
+  const isToday = useCallback((d) => d.isSame(moment(), 'day'), []);
+
+  const displayText = useMemo(() => {
+    if (!sortedInternal.length) return '';
+    return '';
+  }, [sortedInternal]);
+
+  const inputDisplayTags = useMemo(() => {
+    const items = sortedInternal.slice(0, Math.max(0, maxTagCount));
+    const rest = sortedInternal.length - items.length;
+    return { items, rest };
+  }, [sortedInternal, maxTagCount]);
+
+  const onClear = useCallback(() => {
+    setInternal([]);
+    emitChange([]);
+  }, [emitChange]);
+
+  const onOpen = useCallback(() => {
+    setOpen(true);
+    setFocusIndex(null);
   }, []);
 
-  useEffect(() => {
-    if (Array.isArray(value)) setSelected(value.map((d) => moment(d)));
-  }, [value]);
+  const onClose = useCallback(() => {
+    setOpen(false);
+    inputRef.current && inputRef.current.focus();
+  }, []);
 
-  const triggerChange = useCallback(
-    (next) => {
-      if (onChange) onChange(next.map((m) => m.toDate()));
+  const onKeyDown = useCallback(
+    (e) => {
+      if (!open) return;
+      const idx =
+        focusIndex == null
+          ? weeks.findIndex((d) => d.isSame(moment(), 'day'))
+          : focusIndex;
+      let nextIdx = idx;
+      if (e.key === 'ArrowLeft') nextIdx = Math.max(0, idx - 1);
+      if (e.key === 'ArrowRight') nextIdx = Math.min(41, idx + 1);
+      if (e.key === 'ArrowUp') nextIdx = Math.max(0, idx - 7);
+      if (e.key === 'ArrowDown') nextIdx = Math.min(41, idx + 7);
+      if (e.key === 'PageUp')
+        setCursorMonth(cursorMonth.clone().subtract(1, 'month'));
+      if (e.key === 'PageDown')
+        setCursorMonth(cursorMonth.clone().add(1, 'month'));
+      if (e.key === 'Home')
+        nextIdx = weeks.findIndex((d) =>
+          d.isSame(cursorMonth.clone().startOf('month'), 'day'),
+        );
+      if (e.key === 'End')
+        nextIdx = weeks.findIndex((d) =>
+          d.isSame(cursorMonth.clone().endOf('month'), 'day'),
+        );
+      if (e.key === 'Escape') onClose();
+      if (
+        [
+          'ArrowLeft',
+          'ArrowRight',
+          'ArrowUp',
+          'ArrowDown',
+          'Home',
+          'End',
+        ].includes(e.key)
+      ) {
+        setFocusIndex(nextIdx);
+        e.preventDefault();
+      }
+      if (e.key === 'Enter' || e.key === ' ') {
+        const d = weeks[nextIdx];
+        onCellClick(d);
+        e.preventDefault();
+      }
     },
-    [onChange],
+    [open, focusIndex, weeks, cursorMonth, onClose, onCellClick],
   );
 
-  const onToggleDate = useCallback(
-    (date) => {
-      const key = moment(date).format('YYYY-MM-DD');
-      const exists = selected.some((m) => m.format('YYYY-MM-DD') === key);
-      const next = exists
-        ? selected.filter((m) => m.format('YYYY-MM-DD') !== key)
-        : selected.length < (maxCount || Infinity)
-          ? [...selected, moment(date)]
-          : selected;
-      next.sort((a, b) => a.valueOf() - b.valueOf());
-      setSelected(next);
-      triggerChange(next);
-    },
-    [selected, triggerChange, maxCount],
-  );
-
   useEffect(() => {
-    if (!open) return;
+    if (!open) return undefined;
     const handler = (e) => {
-      if (e.key === 'Escape') setOpen(false);
-      if (e.ctrlKey && (e.key === 'ArrowRight' || e.key === 'ArrowUp')) {
-        setViewDate((d) => d.clone().add(1, 'month'));
-      }
-      if (e.ctrlKey && (e.key === 'ArrowLeft' || e.key === 'ArrowDown')) {
-        setViewDate((d) => d.clone().subtract(1, 'month'));
-      }
-      if (!e.ctrlKey && (e.key === 'Enter' || e.key === ' ')) {
-        if (focusDate) onToggleDate(focusDate);
-      }
-      if (!e.ctrlKey && e.key === 'ArrowRight') setFocusDate((d) => (d ? d.clone().add(1, 'day') : moment()));
-      if (!e.ctrlKey && e.key === 'ArrowLeft') setFocusDate((d) => (d ? d.clone().subtract(1, 'day') : moment()));
-      if (!e.ctrlKey && e.key === 'ArrowUp') setFocusDate((d) => (d ? d.clone().subtract(7, 'day') : moment()));
-      if (!e.ctrlKey && e.key === 'ArrowDown') setFocusDate((d) => (d ? d.clone().add(7, 'day') : moment()));
+      const ov = overlayRef.current;
+      if (!ov) return;
+      if (ov.contains(e.target)) return;
+      onClose();
     };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [open]);
+    document.addEventListener('mousedown', handler, true);
+    document.addEventListener('touchstart', handler, true);
+    document.addEventListener('click', handler, true);
+    window.addEventListener('click', handler, true);
+    window.addEventListener('pointerdown', handler, true);
+    return () => {
+      document.removeEventListener('mousedown', handler, true);
+      document.removeEventListener('touchstart', handler, true);
+      document.removeEventListener('click', handler, true);
+      window.removeEventListener('click', handler, true);
+      window.removeEventListener('pointerdown', handler, true);
+    };
+  }, [open, onClose]);
 
-  const [viewDate, setViewDate] = useState(moment());
-  const [focusDate, setFocusDate] = useState(null);
-
-  const dateCell = useCallback(
-    (date) => {
-      const isSelected = selected.some((m) => date.isSame(m, 'day'));
-      const canPick = !(disabledDate && disabledDate(date));
-      const classes = ['mdp-day-cell'];
-      if (isSelected) classes.push('mdp-selected');
-      const onClick = () => {
-        if (canPick) onToggleDate(date);
-      };
-      const onEnter = () => setFocusDate(date);
-      return (
-        <div
-          className={classes.join(' ')}
-          onClick={onClick}
-          onMouseEnter={onEnter}
-          aria-selected={isSelected}
-        >
-          {date.date()}
-          {isSelected && (
-            <span className="mdp-selected-dot" aria-hidden="true" />
-          )}
-        </div>
+  const applyPreset = useCallback(
+    (preset) => {
+      if (!preset) return;
+      const v =
+        typeof preset.value === 'function' ? preset.value() : preset.value;
+      const arr = normalizeToMoments(v, dateFormat).filter(
+        (x) => !isDisabled(x, disabledDate),
       );
+      setInternal(arr);
+      emitChange(arr);
     },
-    [selected, disabledDate, onToggleDate],
-  );
-
-  const renderSelectedText = useMemo(
-    () => (
-      <span className="mdp-text-value" title={selected.map((d) => d.format('YYYY-MM-DD')).join(',')}>
-        {selected.map((d) => d.format('YYYY-MM-DD')).join(',')}
-      </span>
-    ),
-    [selected],
+    [disabledDate, emitChange, dateFormat],
   );
 
   return (
-    <div className="mdp-root">
+    <div className="mdp-wrapper" ref={wrapperRef}>
       <div
-        ref={rootRef}
-        className={`ant-input ${size === 'small' ? 'ant-input-sm' : size === 'large' ? 'ant-input-lg' : ''} ${className || ''} mdp-input`}
+        className="mdp-input-row"
         role="combobox"
         aria-haspopup="grid"
         aria-expanded={open}
-        onClick={() => setOpen(true)}
-        tabIndex={0}
-        style={style}
       >
-        <div className="mdp-input-content">
-          {selected.length > 0 ? (
-            renderSelectedText
-          ) : (
-            <span className="mdp-placeholder">
-              {placeholder || i18n.choose}
+        <Input
+          ref={inputRef}
+          readOnly
+          value={displayText}
+          placeholder={placeholder}
+          onClick={onOpen}
+          suffix={
+            <span className="mdp-suffix">
+              <Icon type="calendar" onClick={onOpen} />
+              {sortedInternal.length > 0 && (
+                <Icon type="close" onClick={onClear} />
+              )}
             </span>
-          )}
-        </div>
-        <Icon type="calendar" className="mdp-calendar-icon" />
-        {selected.length > 0 && (
-          <span className="mdp-badge-count">{selected.length}</span>
+          }
+        />
+        {sortedInternal.length > 0 && (
+          <div className="mdp-input-tags" onClick={onOpen}>
+            {inputDisplayTags.items.map((d) => (
+              <Tag
+                key={`in-${d.format('YYYY-MM-DD')}`}
+                className="mdp-tag-primary"
+              >
+                {d.format(displayFormat)}
+              </Tag>
+            ))}
+            {inputDisplayTags.rest > 0 && (
+              <Tag className="mdp-tag-ellipsis">{`+${inputDisplayTags.rest}`}</Tag>
+            )}
+          </div>
         )}
       </div>
-
+      <div className="mdp-tags-row">
+        {sortedInternal.map((d) => (
+          <Tag
+            key={d.format('YYYY-MM-DD')}
+            closable
+            onClose={() => onCellClick(d)}
+            className="mdp-tag-primary"
+          >
+            {d.format(displayFormat)}
+          </Tag>
+        ))}
+        {sortedInternal.length > 0 && (
+          <Button size="small" onClick={onClear} style={{ marginLeft: 8 }}>
+            清空
+          </Button>
+        )}
+        {sortedInternal.length > 0 && (
+          <span className="mdp-count-badge">{sortedInternal.length}</span>
+        )}
+      </div>
       {open && (
-        <div
-          className="mdp-overlay"
-          role="dialog"
-          aria-label="Multiple date picker"
-        >
-          <div className="mdp-header">
-            <div className="mdp-nav" style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
-              <Icon
-                type="double-left"
+        <>
+          <div className="mdp-mask" onClick={onClose} />
+          <div className="mdp-overlay" role="dialog" ref={overlayRef}>
+            <div className="mdp-header">
+              <Button
+                size="small"
                 onClick={() =>
-                  setViewDate(viewDate.clone().subtract(1, 'year'))
+                  setCursorMonth(cursorMonth.clone().subtract(1, 'month'))
                 }
-              />
-              <Icon
-                type="left"
+              >
+                <Icon type="left" />
+              </Button>
+              <span className="mdp-header-title">
+                {cursorMonth.format('YYYY-MM')}
+              </span>
+              <Button
+                size="small"
                 onClick={() =>
-                  setViewDate(viewDate.clone().subtract(1, 'month'))
+                  setCursorMonth(cursorMonth.clone().add(1, 'month'))
                 }
-              />
-              <span className="mdp-header-label">{viewDate.format('YYYY年MM月')}</span>
-              <Icon
-                type="right"
-                onClick={() => setViewDate(viewDate.clone().add(1, 'month'))}
-              />
-              <Icon
-                type="double-right"
-                onClick={() => setViewDate(viewDate.clone().add(1, 'year'))}
-              />
+              >
+                <Icon type="right" />
+              </Button>
+              <Button
+                size="small"
+                onClick={onClose}
+                style={{ marginLeft: 'auto' }}
+              >
+                关闭
+              </Button>
             </div>
-          </div>
-          <AntDatePicker
-            value={null}
-            onChange={() => {}}
-            open={true}
-            disabledDate={disabledDate}
-            dateRender={dateCell}
-            placeholder={placeholder}
-            showTime={false}
-            style={{ width: '100%' }}
-          />
-          <div className="mdp-footer">
-            <a
-              className="mdp-clear-btn"
-              onClick={() => {
-                setSelected([]);
-                triggerChange([]);
-              }}
+            <div className="mdp-weekdays">
+              {weekdays.map((w, i) => (
+                <div key={i} className="mdp-weekday-cell">
+                  {w}
+                </div>
+              ))}
+            </div>
+            <div
+              className="mdp-grid"
+              role="grid"
+              tabIndex={0}
+              onKeyDown={onKeyDown}
+              ref={gridRef}
             >
-              {i18n.clear}
-            </a>
+              {weeks.map((d, idx) => {
+                const selected = isSelected(d);
+                const disabled = isDisabled(d, disabledDate);
+                const thisMonth = isThisMonth(d);
+                const today = isToday(d);
+                const focused = focusIndex === idx;
+                const adjLeft =
+                  selected && isSelected(d.clone().subtract(1, 'day'));
+                const adjRight =
+                  selected && isSelected(d.clone().add(1, 'day'));
+                let alpha = null;
+                if (selected && mode === 'range' && sortedInternal.length > 1) {
+                  const key = d.format('YYYY-MM-DD');
+                  const pos = sortedInternal.findIndex(
+                    (x) => x.format('YYYY-MM-DD') === key,
+                  );
+                  if (pos >= 0) {
+                    const ratio =
+                      sortedInternal.length > 1
+                        ? pos / (sortedInternal.length - 1)
+                        : 0;
+                    alpha = 0.2 + 0.4 * ratio;
+                  }
+                }
+                const className = [
+                  'mdp-day-cell',
+                  selected ? 'mdp-selected' : '',
+                  disabled ? 'mdp-disabled' : '',
+                  thisMonth ? 'mdp-cur' : 'mdp-other',
+                  today ? 'mdp-today' : '',
+                  focused ? 'mdp-focused' : '',
+                  selected && mode === 'range' ? 'mdp-range' : '',
+                  adjLeft ? 'mdp-adj-left mdp-link-left' : '',
+                  adjRight ? 'mdp-adj-right mdp-link-right' : '',
+                ].join(' ');
+                return (
+                  <button
+                    type="button"
+                    key={d.format('YYYY-MM-DD')}
+                    className={className}
+                    aria-selected={selected}
+                    aria-disabled={disabled}
+                    style={alpha != null ? { '--mdp-alpha': alpha } : undefined}
+                    onClick={() => onCellClick(d)}
+                  >
+                    {d.date()}
+                  </button>
+                );
+              })}
+            </div>
+            {presets && presets.length > 0 && (
+              <div className="mdp-presets">
+                {presets.map((p, i) => (
+                  <Button size="small" key={i} onClick={() => applyPreset(p)}>
+                    {p.label}
+                  </Button>
+                ))}
+              </div>
+            )}
+            {renderExtraFooter && (
+              <div className="mdp-extra-footer">{renderExtraFooter()}</div>
+            )}
           </div>
-        </div>
+        </>
       )}
     </div>
   );
-};
+}
 
 MultiDatePicker.propTypes = {
-  value: PropTypes.array,
-  defaultValue: PropTypes.array,
+  value: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.any), PropTypes.any]),
   onChange: PropTypes.func,
+  mode: PropTypes.oneOf(['single', 'multiple', 'range']),
   disabledDate: PropTypes.func,
+  dateFormat: PropTypes.string,
+  displayFormat: PropTypes.string,
   placeholder: PropTypes.string,
-  size: PropTypes.oneOf(['small', 'default', 'large']),
-  className: PropTypes.string,
-  style: PropTypes.object,
-  maxCount: PropTypes.number,
-  locale: PropTypes.oneOf(['zh-CN', 'en-US']),
+  presets: PropTypes.array,
+  renderExtraFooter: PropTypes.func,
+  locale: PropTypes.string,
+  weekdayFormat: PropTypes.oneOf(['short', 'zhou', 'xingqi']),
 };
 
 export default MultiDatePicker;
