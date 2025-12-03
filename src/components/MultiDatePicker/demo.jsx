@@ -42,10 +42,10 @@ function Demo() {
         value={val}
         onChange={(d, s) => setVal(d || [])}
         mode="multiple"
-        presets={presets}
         displayFormat="YYYY-MM-DD"
         weekdayFormat="xingqi"
         placeholder="请选择日期"
+        disabledDate={(d) => d.isBefore(moment().subtract(1, 'day'))}
       />
       <div style={{ marginTop: 16 }}>
         <Form>

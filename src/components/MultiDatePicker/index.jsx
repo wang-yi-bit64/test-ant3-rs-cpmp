@@ -1,4 +1,4 @@
-import { Button, Icon, Input, Tag } from 'antd';
+import { Button, Icon, Input, Select, Tag } from 'antd';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import React, {
@@ -8,10 +8,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import 'antd/lib/input/style/index.css';
-import 'antd/lib/tag/style/index.css';
-import 'antd/lib/button/style/index.css';
-import 'antd/lib/icon/style/index.css';
+
 import styles from './index.module.css';
 
 function normalizeToMoments(value, dateFormat) {
@@ -60,10 +57,12 @@ function MultiDatePicker(props) {
     displayFormat = 'MM-DD',
     placeholder = '请选择日期',
     presets,
+    renderButton,
     renderExtraFooter,
     locale,
     weekdayFormat = 'zhou',
     maxTagCount = 2,
+    yearRange,
   } = props;
 
   const [open, setOpen] = useState(false);
@@ -74,6 +73,48 @@ function MultiDatePicker(props) {
   const gridRef = useRef(null);
   const wrapperRef = useRef(null);
   const overlayRef = useRef(null);
+
+  const years = useMemo(() => {
+    const currentYear = moment().year();
+    let minY = currentYear - 10;
+    let maxY = currentYear + 10;
+    if (
+      Array.isArray(yearRange) &&
+      yearRange.length === 2 &&
+      Number.isInteger(yearRange[0]) &&
+      Number.isInteger(yearRange[1]) &&
+      yearRange[0] <= yearRange[1]
+    ) {
+      minY = yearRange[0];
+      maxY = yearRange[1];
+    }
+    const range = [];
+    for (let y = minY; y <= maxY; y += 1) range.push(y);
+    return range;
+  }, [yearRange]);
+
+  const months = useMemo(() => {
+    return Array.from({ length: 12 }).map((_, idx) => ({
+      label: String(idx + 1),
+      value: idx,
+    }));
+  }, []);
+
+  const onYearChange = useCallback(
+    (y) => {
+      const next = cursorMonth.clone().year(y);
+      setCursorMonth(next);
+    },
+    [cursorMonth],
+  );
+
+  const onMonthChange = useCallback(
+    (m) => {
+      const next = cursorMonth.clone().month(m);
+      setCursorMonth(next);
+    },
+    [cursorMonth],
+  );
 
   useEffect(() => {
     if (locale) moment.locale(locale);
@@ -239,7 +280,9 @@ function MultiDatePicker(props) {
         nextIdx = weeks.findIndex((d) =>
           d.isSame(cursorMonth.clone().endOf('month'), 'day'),
         );
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        e.preventDefault();
+      }
       if (
         [
           'ArrowLeft',
@@ -298,6 +341,24 @@ function MultiDatePicker(props) {
     [disabledDate, emitChange, dateFormat],
   );
 
+  const renderPresetButton = useCallback(
+    (preset, index) => {
+      const onClick = () => applyPreset(preset);
+      if (typeof renderButton === 'function') {
+        return renderButton(preset, onClick, index);
+      }
+      if (typeof renderButton === null) {
+        return [];
+      }
+      return (
+        <Button size="small" key={index} onClick={onClick}>
+          {preset.label}
+        </Button>
+      );
+    },
+    [renderButton, applyPreset],
+  );
+
   return (
     <div className={styles.wrapper} ref={wrapperRef}>
       <div
@@ -324,12 +385,18 @@ function MultiDatePicker(props) {
         {sortedInternal.length > 0 && (
           <div className={styles.inputTags} onClick={onOpen}>
             {inputDisplayTags.items.map((d) => (
-              <Tag key={`in-${d.format('YYYY-MM-DD')}`} className={styles.tagPrimary} color="#108ee9">
+              <Tag
+                key={`in-${d.format('YYYY-MM-DD')}`}
+                className={styles.tagPrimary}
+                color="#108ee9"
+              >
                 {d.format(displayFormat)}
               </Tag>
             ))}
             {inputDisplayTags.rest > 0 && (
-              <Tag className={styles.tagEllipsis}>{`+${inputDisplayTags.rest}`}</Tag>
+              <Tag
+                className={styles.tagEllipsis}
+              >{`+${inputDisplayTags.rest}`}</Tag>
             )}
           </div>
         )}
@@ -358,7 +425,7 @@ function MultiDatePicker(props) {
       {open && (
         <>
           <div className="mdp-mask" onClick={onClose} />
-          <div className={styles.overlay} role="dialog" ref={overlayRef}>
+          <div className="mdp-overlay" role="dialog" ref={overlayRef}>
             <div className="mdp-header">
               <Button
                 size="small"
@@ -368,9 +435,36 @@ function MultiDatePicker(props) {
               >
                 <Icon type="left" />
               </Button>
-              <span className="mdp-header-title">
-                {cursorMonth.format('YYYY-MM')}
-              </span>
+              <div className="mdp-header-controls">
+                <Select
+                  size="small"
+                  value={cursorMonth.year()}
+                  onChange={onYearChange}
+                  aria-label="选择年份"
+                  getPopupContainer={() => overlayRef.current || document.body}
+                  style={{ width: 100 }}
+                >
+                  {years.map((y) => (
+                    <Select.Option key={y} value={y}>
+                      {y}
+                    </Select.Option>
+                  ))}
+                </Select>
+                <Select
+                  size="small"
+                  value={cursorMonth.month()}
+                  onChange={onMonthChange}
+                  aria-label="选择月份"
+                  getPopupContainer={() => overlayRef.current || document.body}
+                  style={{ width: 80 }}
+                >
+                  {months.map((m) => (
+                    <Select.Option key={m.value} value={m.value}>
+                      {m.label}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </div>
               <Button
                 size="small"
                 onClick={() =>
@@ -378,13 +472,6 @@ function MultiDatePicker(props) {
                 }
               >
                 <Icon type="right" />
-              </Button>
-              <Button
-                size="small"
-                onClick={onClose}
-                style={{ marginLeft: 'auto' }}
-              >
-                关闭
               </Button>
             </div>
             <div className="mdp-weekdays">
@@ -453,11 +540,7 @@ function MultiDatePicker(props) {
             </div>
             {presets && presets.length > 0 && (
               <div className="mdp-presets">
-                {presets.map((p, i) => (
-                  <Button size="small" key={i} onClick={() => applyPreset(p)}>
-                    {p.label}
-                  </Button>
-                ))}
+                {presets.map((p, i) => renderPresetButton(p, i))}
               </div>
             )}
             {renderExtraFooter && (

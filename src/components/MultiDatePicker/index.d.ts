@@ -17,10 +17,16 @@ export interface MultiDatePickerProps {
   displayFormat?: string;
   placeholder?: string;
   presets?: MultiDatePreset[];
+  renderButton?: (
+    preset: MultiDatePreset,
+    onClick: () => void,
+    index?: number,
+  ) => ReactNode;
   renderExtraFooter?: () => ReactNode;
   locale?: string;
   weekdayFormat?: 'short' | 'zhou' | 'xingqi';
   maxTagCount?: number;
+  yearRange?: [number, number];
 }
 
 declare const MultiDatePicker: (props: MultiDatePickerProps) => JSX.Element;

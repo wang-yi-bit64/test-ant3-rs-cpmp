@@ -1,3 +1,4 @@
+import { Button } from 'antd';
 import moment from 'moment';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -31,7 +32,9 @@ test('输入内更多计数以 +N 展示', () => {
   cells[11].click();
   const tagsInInput = container.querySelectorAll('[role="combobox"] .ant-tag');
   const lastTag = tagsInInput[tagsInInput.length - 1];
-  expect(lastTag && lastTag.textContent && lastTag.textContent.startsWith('+')).toBe(true);
+  expect(
+    lastTag && lastTag.textContent && lastTag.textContent.startsWith('+'),
+  ).toBe(true);
 });
 
 test('范围选择两次点击生成连续日期', () => {
@@ -62,7 +65,9 @@ test('连续选择生成连接类名与渐变强度', () => {
   const cells = container.querySelectorAll('[role="grid"] button');
   cells[10].click();
   cells[12].click();
-  const cellsAll = Array.from(container.querySelectorAll('[role="grid"] button'));
+  const cellsAll = Array.from(
+    container.querySelectorAll('[role="grid"] button'),
+  );
   const selectedIdxs = cellsAll
     .map((el, i) => (el.getAttribute('aria-selected') === 'true' ? i : -1))
     .filter((i) => i >= 0);
@@ -86,7 +91,9 @@ test('disabledDate 禁用不可点击', () => {
   const input = container.querySelector('[role="combobox"] input');
   input.click();
   const cells = container.querySelectorAll('[role="grid"] button');
-  const sunday = Array.from(cells).find((c) => c.getAttribute('aria-disabled') === 'true');
+  const sunday = Array.from(cells).find(
+    (c) => c.getAttribute('aria-disabled') === 'true',
+  );
   if (sunday) {
     sunday.click();
     const tags = container.querySelectorAll('.ant-tag');
@@ -149,4 +156,72 @@ test('weekdayFormat="xingqi" 展示“星期”前缀中文', () => {
   const cells = container.querySelectorAll('.mdp-weekday-cell');
   const texts = Array.from(cells).map((c) => c.textContent);
   expect(texts.every((t) => t && t.startsWith('星期'))).toBe(true);
+});
+
+test('月份下拉选择后下拉显示更新并同步网格', () => {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  ReactDOM.render(React.createElement(MultiDatePicker, {}), container);
+  const input = container.querySelector('[role="combobox"] input');
+  input.click();
+  const overlay = container.querySelector('[role="dialog"]');
+  expect(!!overlay).toBe(true);
+  const monthSelect = overlay.querySelectorAll('.ant-select')[1];
+  expect(!!monthSelect).toBe(true);
+  const selectedBefore = monthSelect.querySelector(
+    '.ant-select-selection-selected-value',
+  )?.textContent;
+  monthSelect.querySelector('.ant-select-selection').click();
+  const menuItems = overlay.querySelectorAll('.ant-select-dropdown-menu-item');
+  expect(menuItems.length).toBe(12);
+  menuItems[0].click();
+  const selectedAfter = monthSelect.querySelector(
+    '.ant-select-selection-selected-value',
+  )?.textContent;
+  expect(selectedAfter !== selectedBefore).toBe(true);
+});
+
+test('年份下拉选择后下拉显示年份更新', () => {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  ReactDOM.render(React.createElement(MultiDatePicker, {}), container);
+  const input = container.querySelector('[role="combobox"] input');
+  input.click();
+  const overlay = container.querySelector('[role="dialog"]');
+  const yearSelect = overlay.querySelectorAll('.ant-select')[0];
+  expect(!!yearSelect).toBe(true);
+  const selectedBefore = yearSelect.querySelector(
+    '.ant-select-selection-selected-value',
+  )?.textContent;
+  yearSelect.querySelector('.ant-select-selection').click();
+  const menuItems = overlay.querySelectorAll('.ant-select-dropdown-menu-item');
+  expect(menuItems.length > 0).toBe(true);
+  const lastItem = menuItems[menuItems.length - 1];
+  lastItem.click();
+  const selectedAfter = yearSelect.querySelector(
+    '.ant-select-selection-selected-value',
+  )?.textContent;
+  expect(selectedAfter !== selectedBefore).toBe(true);
+});
+
+test('自定义 renderButton 渲染并点击生效', () => {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const presets = [{ label: '自定义', value: [moment()] }];
+  const CustomBtn = ({ onClick, children }) =>
+    React.createElement('button', { type: 'button', onClick }, children);
+  ReactDOM.render(
+    React.createElement(MultiDatePicker, {
+      presets,
+      renderButton: (preset, onClick) =>
+        React.createElement(CustomBtn, { onClick }, preset.label),
+    }),
+    container,
+  );
+  const input = container.querySelector('[role="combobox"] input');
+  input.click();
+  const custom = container.querySelector('.mdp-presets button');
+  custom.click();
+  const tags = container.querySelectorAll('.ant-tag');
+  expect(tags.length > 0).toBe(true);
 });

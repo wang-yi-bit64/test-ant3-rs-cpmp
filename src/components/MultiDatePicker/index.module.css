@@ -35,7 +35,7 @@
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
   margin-top: 8px;
   padding: 8px;
-  width: 320px;
+  width: 340px;
 }
 :global(.mdp-mask) {
   position: fixed;
@@ -48,9 +48,34 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
+  transition:
+    gap 160ms ease,
+    margin-bottom 160ms ease;
 }
 :global(.mdp-header-title) {
   font-weight: 600;
+}
+:global(.mdp-header-controls) {
+  display: inline-flex;
+  justify-content: space-around;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@media (max-width: 360px) {
+  :global(.mdp-header) {
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  :global(.mdp-header-controls) {
+    gap: 6px;
+  }
 }
 :global(.mdp-weekdays) {
   display: grid;
@@ -62,6 +87,16 @@
   text-align: center;
   font-size: 12px;
   color: #595959;
+  padding: 6px 0;
+  border-radius: 4px;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+:global(.mdp-weekday-cell:hover) {
+  background: rgba(24, 144, 255, 0.06);
+  color: #262626;
 }
 :global(.mdp-grid) {
   display: grid;
@@ -78,7 +113,10 @@
   cursor: pointer;
   border-radius: 4px;
   position: relative;
-  transition: background 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  transition:
+    background 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
 }
 :global(.mdp-day-cell.mdp-cur) {
   color: #000;
@@ -90,25 +128,45 @@
   border: 1px solid #1890ff;
 }
 :global(.mdp-day-cell.mdp-selected) {
-  background: linear-gradient(to right, rgba(24, 144, 255, 0.12), rgba(24, 144, 255, 0.2));
+  background: linear-gradient(
+    to right,
+    rgba(24, 144, 255, 0.12),
+    rgba(24, 144, 255, 0.2)
+  );
   border: 1px solid #91d5ff;
   color: #000;
 }
 :global(.mdp-day-cell.mdp-selected.mdp-range) {
-  background: linear-gradient(to right, rgba(24, 144, 255, 0.12), rgba(24, 144, 255, var(--mdp-alpha, 0.35)));
+  background: linear-gradient(
+    to right,
+    rgba(24, 144, 255, 0.12),
+    rgba(24, 144, 255, var(--mdp-alpha, 0.35))
+  );
 }
 :global(.mdp-day-cell.mdp-selected.mdp-adj-left:not(.mdp-adj-right)) {
-  background: linear-gradient(to right, rgba(24, 144, 255, 0.2), rgba(24, 144, 255, 0));
+  background: linear-gradient(
+    to right,
+    rgba(24, 144, 255, 0.2),
+    rgba(24, 144, 255, 0)
+  );
 }
 :global(.mdp-day-cell.mdp-selected.mdp-adj-right:not(.mdp-adj-left)) {
-  background: linear-gradient(to left, rgba(24, 144, 255, 0.2), rgba(24, 144, 255, 0));
+  background: linear-gradient(
+    to left,
+    rgba(24, 144, 255, 0.2),
+    rgba(24, 144, 255, 0)
+  );
 }
 :global(.mdp-day-cell.mdp-selected.mdp-adj-left.mdp-adj-right) {
-  background: linear-gradient(to right, rgba(24, 144, 255, 0.2), rgba(24, 144, 255, var(--mdp-alpha, 0.35)));
+  background: linear-gradient(
+    to right,
+    rgba(24, 144, 255, 0.2),
+    rgba(24, 144, 255, var(--mdp-alpha, 0.35))
+  );
 }
 :global(.mdp-day-cell.mdp-selected.mdp-link-left::before),
 :global(.mdp-day-cell.mdp-selected.mdp-link-right::after) {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -220,7 +278,18 @@
   cursor: pointer;
   border-radius: 4px;
   position: relative;
-  transition: background 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  transition:
+    background 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+  will-change: background, box-shadow, transform;
+}
+:local(.dayCell:hover) {
+  background: rgba(24, 144, 255, 0.06);
+  box-shadow: 0 0 0 1px rgba(24, 144, 255, 0.18) inset;
+}
+:local(.dayCell:active) {
+  transform: translateZ(0) scale(0.98);
 }
 :local(.cur) {
   color: #000;
@@ -232,25 +301,45 @@
   border: 1px solid #1890ff;
 }
 :local(.selected) {
-  background: linear-gradient(to right, rgba(24, 144, 255, 0.12), rgba(24, 144, 255, 0.2));
+  background: linear-gradient(
+    to right,
+    rgba(24, 144, 255, 0.12),
+    rgba(24, 144, 255, 0.2)
+  );
   border: 1px solid #91d5ff;
   color: #000;
 }
 :local(.selected.range) {
-  background: linear-gradient(to right, rgba(24, 144, 255, 0.12), rgba(24, 144, 255, var(--mdp-alpha, 0.35)));
+  background: linear-gradient(
+    to right,
+    rgba(24, 144, 255, 0.12),
+    rgba(24, 144, 255, var(--mdp-alpha, 0.35))
+  );
 }
 :local(.selected.adjLeft:not(.adjRight)) {
-  background: linear-gradient(to right, rgba(24, 144, 255, 0.2), rgba(24, 144, 255, 0));
+  background: linear-gradient(
+    to right,
+    rgba(24, 144, 255, 0.2),
+    rgba(24, 144, 255, 0)
+  );
 }
 :local(.selected.adjRight:not(.adjLeft)) {
-  background: linear-gradient(to left, rgba(24, 144, 255, 0.2), rgba(24, 144, 255, 0));
+  background: linear-gradient(
+    to left,
+    rgba(24, 144, 255, 0.2),
+    rgba(24, 144, 255, 0)
+  );
 }
 :local(.selected.adjLeft.adjRight) {
-  background: linear-gradient(to right, rgba(24, 144, 255, 0.2), rgba(24, 144, 255, var(--mdp-alpha, 0.35)));
+  background: linear-gradient(
+    to right,
+    rgba(24, 144, 255, 0.2),
+    rgba(24, 144, 255, var(--mdp-alpha, 0.35))
+  );
 }
 :local(.selected.linkLeft)::before,
 :local(.selected.linkRight)::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -275,8 +364,50 @@
 :local(.focused) {
   box-shadow: 0 0 0 2px #91d5ff;
 }
-:local(.adjLeft) {}
-:local(.adjRight) {}
-:local(.linkLeft) {}
-:local(.linkRight) {}
-:local(.range) {}
+:local(.adjLeft) {
+}
+:local(.adjRight) {
+}
+:local(.linkLeft) {
+}
+:local(.linkRight) {
+}
+:local(.range) {
+}
+
+@keyframes mdpFadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:local(.overlay) {
+  animation: mdpFadeSlideIn 160ms ease;
+}
+
+@media (max-width: 360px) {
+  :global(.mdp-weekdays) {
+    gap: 3px;
+  }
+  :global(.mdp-weekday-cell) {
+    font-size: 11px;
+    padding: 4px 0;
+  }
+  :local(.overlay) {
+    width: 280px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(.mdp-weekday-cell),
+  :local(.dayCell),
+  :local(.overlay) {
+    transition: none;
+    animation: none;
+  }
+}
