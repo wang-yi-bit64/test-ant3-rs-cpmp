@@ -51,6 +51,7 @@ function MultiDatePicker(props) {
   const {
     value,
     onChange,
+    defaultValue,
     mode = 'multiple',
     disabledDate,
     dateFormat = 'YYYY-MM-DD',
@@ -73,6 +74,8 @@ function MultiDatePicker(props) {
   const gridRef = useRef(null);
   const wrapperRef = useRef(null);
   const overlayRef = useRef(null);
+  const defaultAppliedRef = useRef(false);
+  const isControlled = value !== undefined;
 
   const years = useMemo(() => {
     const currentYear = moment().year();
@@ -121,8 +124,17 @@ function MultiDatePicker(props) {
   }, [locale]);
 
   useEffect(() => {
-    setInternal(normalizeToMoments(value, dateFormat));
-  }, [value, dateFormat]);
+    if (isControlled) {
+      setInternal(normalizeToMoments(value, dateFormat));
+    }
+  }, [isControlled, value, dateFormat]);
+
+  useEffect(() => {
+    if (!isControlled && !defaultAppliedRef.current && defaultValue) {
+      setInternal(normalizeToMoments(defaultValue, dateFormat));
+      defaultAppliedRef.current = true;
+    }
+  }, [isControlled, defaultValue, dateFormat]);
 
   const weeks = useMemo(() => {
     const start = cursorMonth.clone().startOf('month').startOf('week');
@@ -174,10 +186,10 @@ function MultiDatePicker(props) {
       const next = exists
         ? internal.filter((x) => !x.isSame(d, 'day'))
         : internal.concat(d.clone());
-      setInternal(next);
+      if (!isControlled) setInternal(next);
       emitChange(next);
     },
-    [internal, disabledDate, emitChange],
+    [internal, disabledDate, emitChange, isControlled],
   );
 
   const selectRange = useCallback(
@@ -185,7 +197,7 @@ function MultiDatePicker(props) {
       if (isDisabled(d, disabledDate)) return;
       if (internal.length === 0) {
         const next = [d.clone()];
-        setInternal(next);
+        if (!isControlled) setInternal(next);
         emitChange(next);
         return;
       }
@@ -193,15 +205,15 @@ function MultiDatePicker(props) {
         const nextRange = betweenInclusive(internal[0], d).filter(
           (x) => !isDisabled(x, disabledDate),
         );
-        setInternal(nextRange);
+        if (!isControlled) setInternal(nextRange);
         emitChange(nextRange);
         return;
       }
       const next = [d.clone()];
-      setInternal(next);
+      if (!isControlled) setInternal(next);
       emitChange(next);
     },
-    [internal, disabledDate, emitChange],
+    [internal, disabledDate, emitChange, isControlled],
   );
 
   const onCellClick = useCallback(
@@ -211,13 +223,13 @@ function MultiDatePicker(props) {
       } else if (mode === 'single') {
         if (isDisabled(d, disabledDate)) return;
         const next = [d.clone()];
-        setInternal(next);
+        if (!isControlled) setInternal(next);
         emitChange(next);
       } else {
         selectMultiple(d);
       }
     },
-    [mode, selectRange, selectMultiple, disabledDate, emitChange],
+    [mode, selectRange, selectMultiple, disabledDate, emitChange, isControlled],
   );
 
   const isSelected = useCallback(
@@ -242,9 +254,9 @@ function MultiDatePicker(props) {
   }, [sortedInternal, maxTagCount]);
 
   const onClear = useCallback(() => {
-    setInternal([]);
+    if (!isControlled) setInternal([]);
     emitChange([]);
-  }, [emitChange]);
+  }, [emitChange, isControlled]);
 
   const onOpen = useCallback(() => {
     setOpen(true);
@@ -335,10 +347,10 @@ function MultiDatePicker(props) {
       const arr = normalizeToMoments(v, dateFormat).filter(
         (x) => !isDisabled(x, disabledDate),
       );
-      setInternal(arr);
+      if (!isControlled) setInternal(arr);
       emitChange(arr);
     },
-    [disabledDate, emitChange, dateFormat],
+    [disabledDate, emitChange, dateFormat, isControlled],
   );
 
   const renderPresetButton = useCallback(
@@ -555,6 +567,10 @@ function MultiDatePicker(props) {
 
 MultiDatePicker.propTypes = {
   value: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.any), PropTypes.any]),
+  defaultValue: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.any),
+    PropTypes.any,
+  ]),
   onChange: PropTypes.func,
   mode: PropTypes.oneOf(['single', 'multiple', 'range']),
   disabledDate: PropTypes.func,

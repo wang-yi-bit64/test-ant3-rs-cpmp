@@ -54,6 +54,13 @@ function Demo() {
           </Form.Item>
         </Form>
       </div>
+      <MultiDatePicker
+        mode="multiple"
+        displayFormat="YYYY-MM-DD"
+        weekdayFormat="xingqi"
+        placeholder="请选择日期"
+        disabledDate={(d) => d.isBefore(moment().subtract(1, 'day'))}
+      />
     </div>
   );
 }
