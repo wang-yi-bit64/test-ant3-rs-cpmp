@@ -48,10 +48,18 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
+  justify-content: space-around;
 }
 .mdp-header-title {
   font-weight: 600;
 }
+
+.mdp-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .mdp-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
